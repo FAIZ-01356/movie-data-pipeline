@@ -21,22 +21,29 @@ Load:
   - ETL script is idempotent — deletes previous data before inserting new data to avoid duplication.
 
 Design Choices & Assumptions
-Design Choice	Reason
-Normalized schema (movies, genres, movie_genres tables)	Allows storing multiple genres per movie (many-to-many relationship)
-Store only average rating instead of storing every user rating	Simplifies stored dataset and matches business need
-API enrichment using movie title	movieId does not exist on OMDb, but title matching works
-Idempotent loading (DELETE → INSERT)	Ensures re-running ETL does not insert duplicate records
-Default values when API returns missing data	Prevents failure of script and ensures consistent data loading
 
-Assumptions:
+I used a normalized database structure with three tables (movies, genres, movie_genres) because a movie can belong to multiple genres, and storing them in separate tables avoids duplication and makes querying easier.
 
-Movie titles in CSV generally match OMDb titles.
+Instead of storing all user ratings, I only stored the average rating per movie. The raw user ratings were not required for the analysis, so calculating the average helped reduce database size.
 
-Average rating per movie is enough for analytical queries (raw user rating is not required).
+Movie metadata (runtime, director, actors, IMDb ratings, etc.) was fetched from the OMDb API using the movie title since the dataset did not contain IMDb IDs.
+
+The ETL script was built to be idempotent — it deletes existing data before inserting new data to avoid duplicates when the script runs multiple times.
+
+When the API does not return complete data or fields, I replaced missing values with default placeholders (e.g., "Unknown", 0, "Not Available").
+
 
 Challenges & How They Were Overcome
-Challenge	Solution
-Some movies not found in OMDb API	Script logs them and fills blank values with defaults
-OMDb API returns "N/A" for numeric fields (e.g., IMDb rating, Box Office) causing conversion errors	Replaced "N/A" with None and then converted safely
-Mapping multiple genres from CSV to database schema	Created separate genres table and movie_genres bridge table
+
+Problem: Some movie titles from CSV were not found in the OMDb API.
+Solution: Logged those cases and continued execution with default values.
+
+Problem: API sometimes returned "N/A" for IMDb rating and Box Office, causing type conversion errors.
+Solution: Replaced "N/A" with None and converted fields to numeric safely.
+
+Problem: Movies have multiple genres, making it difficult to store directly in a column.
+Solution: Created a many-to-many relationship using genres and movie_genres tables.
+
+Problem: Re-running ETL caused duplicate rows.
+Solution: Added delete statements before the load phase to make the script idempotent.le genres from CSV to database schema	Created separate genres table and movie_genres bridge table
 Preventing duplicate inserts when script re-runs	Used idempotent delete before insert logic in ETL
