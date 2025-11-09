@@ -3,23 +3,34 @@
 ## Overview
 This project implements an ETL pipeline to process and store movie data into a relational database.
 
-Extract:
+### Extract:
   - Reads movies.csv and ratings.csv using Pandas.
   - Fetches additional movie information (Runtime, Director, Actors, Plot, IMDb rating, Box Office, etc.) from the OMDb API using the movie title.
 
-Transform:
-  - Splits the movie title into Title and Year using regex.
-  - Calculates the average rating per movie from ratings.csv.
-  - Splits genre values into a list and generates a new decade field based on the release year.
+### Transform:
+  - Splits the movie title into **Title** and **Year** using regex.
+  - Calculates the **average rating per movie** from ratings.csv.
+  - Splits genre values into a list and generates a new **decade** field based on the release year.
   - Cleans data (handles missing values, converts IMDb rating & Box Office to numeric).
 
-Load:
+### Load:
   - Loads final transformed data into MySQL into three tables:
       - movies
       - genres
       - movie_genres (relationship table for mapping movies to genres)
-  - ETL script is idempotent — deletes previous data before inserting new data to avoid duplication.
+  - ETL script is **idempotent** — deletes previous data before inserting new data to avoid duplication.
 
+
+## Instructions on how to set up the environment and run your project
+  - Prerequisites :
+      - Python 3.8+
+      - MySQL Server
+      - pip package manager
+      - Internet connection (for OMDb API calls)
+  - Install Dependencies :
+      - pip install pandas requests sqlalchemy pymysql numpy
+  - Configure Database Connection [ Update your database credentials in the script (etl.py) ]
+  - Run the ETL Pipeline
 
 ## Design Choices & Assumptions :
   - I used a normalized database structure with three tables (movies, genres, movie_genres) because a movie can belong to multiple genres, and storing them in separate tables avoids duplication and makes querying easier.
