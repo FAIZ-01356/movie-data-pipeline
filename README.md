@@ -42,13 +42,13 @@ This project implements an ETL pipeline to process and store movie data into a r
 
 ## Challenges & How They Were Overcome :
   - Problem: Some movie titles from CSV were not found in the OMDb API.
-  - Solution: Logged those cases and continued execution with default values.
+    - Solution: Logged those cases and continued execution with default values.
 
   - Problem: API sometimes returned "N/A" for IMDb rating and Box Office, causing type conversion errors.
-  - Solution: Replaced "N/A" with None and converted fields to numeric safely.
+    - Solution: Replaced "N/A" with None and converted fields to numeric safely.
 
   - Problem: Movies have multiple genres, making it difficult to store directly in a column.
-  - Solution: Created a many-to-many relationship using genres and movie_genres tables.
+    - Solution: Created a many-to-many relationship using genres and movie_genres tables.
 
   - Problem: Re-running ETL caused duplicate rows.
-  - Solution: Added delete statements before the load phase to make the script idempotent.
+    - Solution: Added delete statements before the load phase to make the script idempotent.
